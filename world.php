@@ -7,18 +7,18 @@ $dbname = 'world';
 $conn = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
 
 // Get the country parameter from the query string
-$country = isset($_GET['country']) ? $_GET['country'] : '';
-$lookup = isset($_GET['lookup']) ? $_GET['lookup'] : '';
+$country =  $_GET['country'] ?? ''; 
+$lookup = $_GET['lookup'] ?? '';
+
 
 if ($lookup === 'cities') {
     // Query for cities in the specified country
-    $stmt = $conn->prepare("
+    $stmt = $conn->query("
         SELECT cities.name, cities.district, cities.population 
         FROM cities 
         JOIN countries ON cities.country_code = countries.code 
-        WHERE countries.name LIKE :country
+        WHERE countries.name LIKE '%$country%'
     ");
-    $stmt->execute(['country' => "%$country%"]);
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     if (count($results) > 0) {
@@ -47,8 +47,7 @@ if ($lookup === 'cities') {
     }
 } else {
     // Query for country information
-    $stmt = $conn->prepare("SELECT * FROM countries WHERE name LIKE :country");
-    $stmt->execute(['country' => "%$country%"]);
+    $stmt = $conn->query("SELECT * FROM countries WHERE name LIKE '%$country%'");
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     if (count($results) > 0) {
